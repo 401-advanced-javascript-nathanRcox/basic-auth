@@ -1,10 +1,9 @@
 'use strict';
 
-const bcrypt = require('bcrypt');
 const base64 = require('base-64');
 const Users = require('../models/schema');
 
-async function authorization() {
+async function authorization(req, res, next) {
     /*
     req.headers.authorization is : "Basic sdkjdsljd="
     To get username and password from this, take the following steps:
@@ -28,16 +27,17 @@ async function authorization() {
    3. Either we're valid or we throw an error
  */
  try {
-   const user = await Users.findOne({ username })
-   const valid = await bcrypt.compare(password, user.password);
-   if (valid) {
-     res.status(200).json(user);
-     next();
-   }
-   else {
-     throw new Error('Invalid User')
-   }
+   req.user = await Users.authenticateBasic(username, password);
+  //  const user = await Users.findOne({ username })
+  //  const valid = await bcrypt.compare(password, user.password);
+  //  if (valid) {
+  //    res.status(200).json(user);
+  //  }
+  //  else {
+  //    throw new Error('Invalid User')
+  //  }
  } catch(error) { res.status(403).send("Invalid Login"); }
+ next();
 }
 
 module.exports = authorization;
